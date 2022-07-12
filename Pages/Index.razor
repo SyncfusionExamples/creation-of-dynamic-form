@@ -1,0 +1,76 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.CompilerServices
+@using Syncfusion.Blazor.Inputs
+@using System.Linq
+@using System.Dynamic
+
+<EditForm Model="@formelemlist" OnValidSubmit="@Submit">
+    <DataAnnotationsValidator />
+    @CreateComponent(@formelemlist)
+    <ValidationSummary></ValidationSummary>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</EditForm>
+
+@code {
+
+    List<dynamic> formelemlist = new List<dynamic>();
+
+    protected override void OnInitialized()
+    {
+        dynamic field1info = new ExpandoObject();
+        field1info.MaterialName = "BKBKB1";
+        field1info.AttributeName = "GSM1";
+        field1info.EditorName = "ComboBox";
+        field1info.Options = "1|2|3|4";
+        formelemlist.Add(field1info);
+
+        dynamic field2info = new ExpandoObject();
+        field2info.MaterialName = "BKBKB2";
+        field2info.AttributeName = "GSM2";
+        field2info.EditorName = "ComboBox";
+        field2info.Options = "Red|Blue|Green";
+        formelemlist.Add(field2info);
+
+    }
+
+    public RenderFragment CreateComponent(object modelobj) => builder =>
+    {
+        var fieldslist = modelobj as List<dynamic>;
+
+        foreach (IDictionary<string, object> fieldinfo in fieldslist)
+        {
+            object MaterialName;
+            fieldinfo.TryGetValue("MaterialName", out MaterialName);
+            object editor;
+            fieldinfo.TryGetValue("EditorName", out editor);
+            object options;
+            fieldinfo.TryGetValue("Options", out options);
+            if (editor == "ComboBox")
+            {
+                builder.OpenComponent(0, typeof(Syncfusion.Blazor.DropDowns.SfComboBox<string, string>));
+                builder.AddAttribute(1, "DataSource", options.ToString().Split("|").ToList());
+
+                builder.AddAttribute(3, "ValueChanged", RuntimeHelpers.TypeCheck<Microsoft.AspNetCore.Components.EventCallback<System.String>>(Microsoft.AspNetCore.Components.EventCallback.Factory.Create<System.String>(this, Microsoft.AspNetCore.Components.EventCallback.Factory.CreateInferred(this,
+                    __value =>
+                    {
+                        //Handle set code
+                    }, options.ToString().Split("|").ToList()[0]))));
+
+                builder.AddAttribute(1, "Value", options.ToString().Split("|").ToList()[0]);//defaut value
+                builder.AddAttribute(6, "PlaceHolder", MaterialName.ToString());
+                builder.AddAttribute(6, "FloatLabelType", FloatLabelType.Auto);
+                builder.CloseComponent();
+            }
+        }
+    };
+    public void Submit()
+    {
+
+    }
+}
